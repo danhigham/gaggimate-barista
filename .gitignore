@@ -1,0 +1,41 @@
+# Local MCP configuration (contains machine-specific paths)
+.mcp.json
+
+# Claude local settings
+.claude/settings.local.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment
+.env
+
+# MCP runtime data
+mcp/data/
+
+# Personal data (lives in private repo, symlinked back)
+coffees
+grind-map.md
+user-setup.md
+.data-repo-path
+cortex/.cortex-init
+cortex/.cortex-init-backup/
+.claude/worktrees/
+# cortex/
+
+# Cortex overnight/pipeline runtime artifacts (per-run, not source)
+cortex/lifecycle/sessions/
+cortex/lifecycle/overnight-state.json
+cortex/lifecycle/metrics.json
+cortex/lifecycle/*/exit-reports/
+cortex/lifecycle/*/agent-activity.jsonl
+cortex/lifecycle/*/.lock
+cortex/lifecycle/*/.session

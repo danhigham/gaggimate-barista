@@ -1,0 +1,303 @@
+- ts: 2026-04-20T00:00:00Z
+  event: lifecycle_start
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  backlog_item: 018-port-ddsa-algorithm-to-diagnose
+  complexity: complex
+  criticality: high
+  status: ok
+
+- ts: 2026-04-20T00:00:00Z
+  event: clarify_critic
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  findings:
+    - "HIGH intent clarity glosses over undefined output-line format: no concrete per-phase line format for multi-phase shots (phase numbering vs naming, ordering), no auto-delay line format, and AutoDelayEstimate bucket enumeration is not given in the ticket."
+    - "HIGH scope boundedness treats the (a)/(b)/(c) prerequisite fork as bounded, but enumeration is not resolution — the three options have materially different tooling footprints and the choice was punted to 'document in the module PR'."
+    - "Complexity 'leaning complex' understates a correctness-critical numeric port of ~700 lines with hard-fail parity test, 1e-3 tolerance, and a reference the ticket itself flags as partially undocumented (English doc omits constants and edge cases)."
+    - "Requirements alignment SKIPPED is not neutral — the project has CLAUDE.md conventions and 1.8.0 semantic traps that were not checked for conflicts with this feature's module/skill changes."
+    - "Ticket 016 'complete' claim rests on commit messages, not verified fixture-shape compatibility with 018's parity-test design (reference-JS JSON sidecar format, TransformedSample contract for classify_phase_exits signature)."
+    - "Deep-link env var 'GAGGIMATE_HOST' is asserted; CLAUDE.md only references GAGGIMATE_STORAGE_PATH — verification of the actual MCP env var contract was deferred to implementation, not grounded at clarify time."
+    - "Merger of old ticket 020 into 018 is asserted as a clean consolidation without inspecting 020's original acceptance criteria for possibly-separate concerns (fallback when host unreachable, shots not yet synced, non-interactive contexts)."
+  dispositions:
+    apply: 1
+    dismiss: 5
+    ask: 1
+  applied_fixes:
+    - "Revised requirements alignment from SKIPPED to 'Partial alignment with project CLAUDE.md conventions — /consult cascade prevention and repo-first device-second don't apply to diagnostics; new module location (mcp/src/gaggimate_mcp/diagnostics/) aligns with existing MCP structure; no conflicts identified.'"
+  dismissals:
+    - finding_index: 0
+      rationale: "Detailed output-line format and AutoDelayEstimate bucket enumeration are Spec-phase concerns. The user-visible intent — per-phase exit reason, auto-delay estimate, analyzer deep-link — is unambiguous at the Clarify level. Spec's structured interview will lock exact formatting."
+    - finding_index: 2
+      rationale: "The lifecycle complexity schema is binary (simple|complex) and criticality is (low|medium|high|critical). 'Complex' + 'high' is the top non-critical rating and is what the assessment lands on. 'Critical' is reserved for security/data-loss/core-capability loss; a lossy port degrades a skill but does not remove core capability. Rating is calibrated as far as the schema allows."
+    - finding_index: 4
+      rationale: "Self-resolved: lifecycle/shot-fixture-regression-harness/ is complete with .slog + .golden.json fixtures under mcp/tests/fixtures/shots/ (shots 246, 247, 249). Adding .reference-js.json sidecars is purely additive — no format conflict. The classify_phase_exits(transformed_shot) signature matches 015's TransformedSample output already surfaced in the transformer. Research will confirm the specific field mapping."
+    - finding_index: 5
+      rationale: "Self-resolved: mcp/tests/fixtures/shots/README.md line 61 confirms GAGGIMATE_HOST is the env var MCP already reads ('Requires GAGGIMATE_HOST to resolve. Fetches the .slog from the device'). The ticket's assertion is grounded."
+    - finding_index: 6
+      rationale: "Self-resolved: read backlog/archive/020-deep-link-analyzer-in-diagnose.md. 020's AC is a single line: 'Interactive chart: http://{gaggimate_host}/analyze/{shot_id}' with 'No other behavior change in /diagnose output'. No fallback/non-sync/non-interactive concerns were folded in silently — 018's one-line requirement matches 020 exactly."
+  status: ok
+
+- ts: 2026-04-21T00:00:00Z
+  event: orchestrator_review
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  phase: specify
+  verdict: pass
+  cycle: 1
+  issues: []
+
+- ts: 2026-04-21T00:00:00Z
+  event: critical_review_applied
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  phase: specify
+  applied_fixes: 22
+  dismiss_count: 3
+  status: ok
+
+- ts: 2026-04-21T00:00:00Z
+  event: spec_approved
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  status: ok
+
+- ts: 2026-04-21T20:57:00Z
+  event: fixture_sidecars_precaptured
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  fixtures: [246, 247, 249]
+  source: "manage_profile(action=get) against live device"
+  rationale: "R6 prerequisite fulfilled pre-overnight; no device required during execution"
+  status: ok
+
+- ts: 2026-04-21T21:02:00Z
+  event: orchestrator_review
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  phase: plan
+  verdict: pass
+  cycle: 1
+  issues: []
+
+- ts: 2026-04-21T21:20:00Z
+  event: critical_review_applied
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  phase: plan
+  applied_fixes: 8
+  dismiss_count: 6
+  reviewer_angles: 4
+  status: ok
+
+- ts: 2026-04-21T22:00:00Z
+  event: plan_approved
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  status: ok
+
+- ts: 2026-04-21T22:00:00Z
+  event: phase_transition
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  from: plan
+  to: implement
+  status: ok
+
+- ts: 2026-04-21T22:01:00Z
+  event: batch_dispatch
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  batch: 0
+  tasks: [1, 4, 7]
+  status: ok
+
+- ts: 2026-04-21T22:10:00Z
+  event: task_complete
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  task: 1
+  batch: 0
+  status: success
+
+- ts: 2026-04-21T22:10:00Z
+  event: task_complete
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  task: 4
+  batch: 0
+  status: success
+
+- ts: 2026-04-21T22:10:00Z
+  event: task_complete
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  task: 7
+  batch: 0
+  status: success
+  note: "walker actually at mcp/tests/shot_fixture_walker.py (not plan's stated path); spec drift carried into Task 10 import"
+
+- ts: 2026-04-21T22:10:00Z
+  event: batch_dispatch
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  batch: 1
+  tasks: [2, 3, 5]
+  status: ok
+
+- ts: 2026-04-21T22:25:00Z
+  event: task_complete
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  task: 2
+  batch: 1
+  status: success
+
+- ts: 2026-04-21T22:25:00Z
+  event: task_complete
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  task: 3
+  batch: 1
+  status: success
+
+- ts: 2026-04-21T22:25:00Z
+  event: task_complete
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  task: 5
+  batch: 1
+  status: success
+
+- ts: 2026-04-21T22:25:00Z
+  event: batch_dispatch
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  batch: 2
+  tasks: [6, "8a", 13]
+  status: ok
+
+- ts: 2026-04-21T22:45:00Z
+  event: task_complete
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  task: 6
+  batch: 2
+  status: success
+
+- ts: 2026-04-21T22:45:00Z
+  event: task_complete
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  task: "8a"
+  batch: 2
+  status: success
+
+- ts: 2026-04-21T22:45:00Z
+  event: task_complete
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  task: 13
+  batch: 2
+  status: success
+
+- ts: 2026-04-21T22:45:00Z
+  event: batch_dispatch
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  batch: 3
+  tasks: ["8b"]
+  status: ok
+
+- ts: 2026-04-21T22:55:00Z
+  event: task_complete
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  task: "8b"
+  batch: 3
+  status: success
+  note: "PhaseExitReason widened to 22 camelCase fields; match_step omitted (internal-only in JS); smoke parity green on all 3 fixtures including 249 power phase"
+
+- ts: 2026-04-21T22:55:00Z
+  event: batch_dispatch
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  batch: 4
+  tasks: [9]
+  status: ok
+
+- ts: 2026-04-21T23:10:00Z
+  event: task_complete
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  task: 9
+  batch: 4
+  status: success
+  note: "Refactored classify_phase_exits + estimate_auto_delay onto shared _run_phase_analysis. Known divergence: fixture 247 auto_delay Python=None vs JS=200 (seed echo not mirrored); T10 must address."
+
+- ts: 2026-04-21T23:10:00Z
+  event: batch_dispatch
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  batch: 5
+  tasks: [11]
+  status: ok
+
+- ts: 2026-04-21T23:30:00Z
+  event: task_complete
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  task: 11
+  batch: 5
+  status: success
+  note: "Degraded path uses phase_number (int) per spec §17(c); normal path emits number (str) per JS. T12 must reconcile."
+
+- ts: 2026-04-21T23:30:00Z
+  event: batch_dispatch
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  batch: 6
+  tasks: [10, 12, 14, 15]
+  status: ok
+
+- ts: 2026-04-21T23:55:00Z
+  event: task_complete
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  task: 10
+  batch: 6
+  status: success
+  note: "Parity green for all 3 fixtures; seed-echo divergence fixed at source (option a); 13 EXACT entries, 0 float-tolerance entries"
+
+- ts: 2026-04-21T23:55:00Z
+  event: task_complete
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  task: 12
+  batch: 6
+  status: success
+
+- ts: 2026-04-21T23:55:00Z
+  event: task_complete
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  task: 14
+  batch: 6
+  status: success
+
+- ts: 2026-04-21T23:55:00Z
+  event: task_complete
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  task: 15
+  batch: 6
+  status: success
+
+- ts: 2026-04-21T23:55:00Z
+  event: batch_dispatch
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  batch: 7
+  tasks: [16]
+  status: ok
+
+- ts: 2026-04-21T23:55:00Z
+  event: task_complete
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  task: 16
+  batch: 7
+  status: success
+  note: "222 passed, 3 pre-existing failures in test_api_websocket RMW; diagnostics.py unchanged; all 7 gating tests green"
+
+- ts: 2026-04-21T23:55:00Z
+  event: phase_transition
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  tier: complex
+  from: implement
+  to: review
+  status: ok
+
+- ts: 2026-04-22T00:30:00Z
+  event: review_verdict
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  verdict: APPROVED
+  cycle: 1
+  requirements_drift: none
+
+- ts: 2026-04-22T00:30:00Z
+  event: phase_transition
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  from: review
+  to: complete
+
+- ts: 2026-04-22T00:35:00Z
+  event: feature_complete
+  feature: port-ddsa-phaseendstop-algorithm-into-diagnose
+  tasks_total: 17
+  rework_cycles: 1
