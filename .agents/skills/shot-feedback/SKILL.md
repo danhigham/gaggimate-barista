@@ -7,7 +7,9 @@ description: >
   Owns the full shot feedback loop: gathering, analysis, grind map updates, tasting notes, and drink format.
 ---
 
-<command-name>shot-feedback</command-name>
+## Host and paths
+
+Read `../../../AGENTS.md` first. Resolve repository paths (`knowledge/`, `coffees/`, `user-setup.md`, `grind-map.md`, `.data-repo-path`) from that repository root, not this skill directory. In Pi use `/skill:shot-feedback`; in other hosts load this file directly. Follow AGENTS.md capability fallbacks when MCP is unavailable; save local feedback without claiming device sync.
 
 # Shot Feedback & Dialing Skill
 
@@ -26,7 +28,7 @@ Read these files before proceeding:
 | File | When |
 |------|------|
 | `knowledge/PRESSURE_GUIDE.md` (152) | Feedback suggests pressure/profile style change |
-| Active grinder reference resolved per the Active Grinder field parsing contract → `knowledge/grinders/` file | User provides or asks about grind settings — Per the CLAUDE.md Active Grinder field parsing contract, read the `user-setup.md` Grinder field, resolve the active grinder reference by case-insensitive substring against the contract's map (first match wins), attempt to load that `knowledge/grinders/` file, and on any miss or unreadable `user-setup.md` degrade to grinder-relative step advice plus the unconfigured nudge — never error. |
+| Active grinder reference resolved per the Active Grinder field parsing contract → `knowledge/grinders/` file | User provides or asks about grind settings — Per the AGENTS.md Active Grinder field parsing contract, read the `user-setup.md` Grinder field, resolve the active grinder reference by case-insensitive substring against the contract's map (first match wins), attempt to load that `knowledge/grinders/` file, and on any miss or unreadable `user-setup.md` degrade to grinder-relative step advice plus the unconfigured nudge — never error. |
 | `grind-map.md` | Grind setting provided |
 | `knowledge/MILK_AND_DRINKS.md` (148) | User asks about drink format, or shot is dialed in (4+ balanced) and user has milk drink preferences |
 
@@ -69,7 +71,7 @@ A +/-2g estimate is fine for diagnosis and recording.
 
 **Variable-speed RPM gate (pre-check before the adjustment hierarchy):**
 
-Per the CLAUDE.md Active Grinder field parsing contract, read the `user-setup.md` Grinder field, resolve the active grinder reference by case-insensitive substring against the contract's map (first match wins), attempt to load that `knowledge/grinders/` file, and on any miss or unreadable `user-setup.md` degrade to grinder-relative step advice plus the unconfigured nudge — never error. RPM behavior is **ON** iff the resolved **quick-tier** `knowledge/grinders/<NAME>.md` contains a section whose heading is exactly `## Motor Speed (RPM)`. Gating reads the quick-tier file only (not the deep-tier reference, not the Grinder prose). No match, no resolved file, or contract fallback → the grinder is **fixed-speed**: RPM behavior is **OFF** (no RPM prompts, blank RPM column), **never error**. This gate governs the RPM read in Step 2 and the RPM cell of the grind-map writer in Step 4b.
+Per the AGENTS.md Active Grinder field parsing contract, read the `user-setup.md` Grinder field, resolve the active grinder reference by case-insensitive substring against the contract's map (first match wins), attempt to load that `knowledge/grinders/` file, and on any miss or unreadable `user-setup.md` degrade to grinder-relative step advice plus the unconfigured nudge — never error. RPM behavior is **ON** iff the resolved **quick-tier** `knowledge/grinders/<NAME>.md` contains a section whose heading is exactly `## Motor Speed (RPM)`. Gating reads the quick-tier file only (not the deep-tier reference, not the Grinder prose). No match, no resolved file, or contract fallback → the grinder is **fixed-speed**: RPM behavior is **OFF** (no RPM prompts, blank RPM column), **never error**. This gate governs the RPM read in Step 2 and the RPM cell of the grind-map writer in Step 4b.
 
 Use the loaded knowledge files (BREWING_BASICS + TASTING_GUIDE) to diagnose and recommend.
 
@@ -82,7 +84,7 @@ Use the loaded knowledge files (BREWING_BASICS + TASTING_GUIDE) to diagnose and 
 
 **Puck Screen presence detection (pre-check before applying sour-path or channeling-path recommendations):**
 
-Scan the Equipment table in `user-setup.md` for a `Puck Screen` row. Per the CLAUDE.md parsing contract, treat any of the following as **no screen present** (skip the guardrails below): missing row, blank value, or value `None` (case-insensitive). Any other non-empty value means **screen present** — apply the gated guardrails below.
+Scan the Equipment table in `user-setup.md` for a `Puck Screen` row. Per the AGENTS.md parsing contract, treat any of the following as **no screen present** (skip the guardrails below): missing row, blank value, or value `None` (case-insensitive). Any other non-empty value means **screen present** — apply the gated guardrails below.
 
 The skill does NOT carry its own copy of the guardrail wording — it routes to `knowledge/PUCK_SCREENS.md` §Diagnostic Guardrails as the Single Source of Truth. The cold-screen check is a pre-check inserted before the existing sour → grind-finer path, NOT a reordering of the adjustment hierarchy above.
 
@@ -110,7 +112,7 @@ The skill does NOT carry its own copy of the guardrail wording — it routes to 
 
 When the gate is ON and the user states an RPM for this session that **differs** from the current `Operating RPM` read from `user-setup.md` (a single read — do NOT scan prior grind-map rows), do both of the following:
 1. **Warn and re-anchor.** Explain that RPM is a coarse lever that shifts the grind distribution, so the old grind setting no longer maps to the same shot. Recommend **re-dialing grind to restore the target shot time** — let the shot timer tell you which way — rather than carrying the old grind number forward. (Do not restate RPM range numbers; for the why, route to `knowledge/grinders/DF64V.md`.)
-2. **Update (or create) the Operating RPM field.** Write the new stated RPM into `user-setup.md`'s `Operating RPM` field — **creating the row if it is absent** (per Task 4's documented contract) — mirroring how the Active Coffee section is updated in `/new-coffee`. **Symlink-resolve before writing:** `user-setup.md` is a symlink file into the private data repo and the Edit/Write tool refuses to write through it. Run `readlink user-setup.md`; if it resolves, Read AND Edit the resolved absolute target (e.g. `/Users/charlie.hall/Workspaces/gaggimate-barista-data/user-setup.md`); if `readlink` returns nothing (regular file — no private repo configured), operate on the literal path. The Read-before-edit and the Edit must target the SAME resolved path. This write must reach the Step 4e `.data-repo-path` commit/push **even when no rating is recorded** (a mid-bag RPM report may arrive on an unrated shot), so perform the Step 4e commit path regardless of whether a rating was logged.
+2. **Update (or create) the Operating RPM field.** Write the new stated RPM into `user-setup.md`'s `Operating RPM` field — **creating the row if it is absent** (per Task 4's documented contract) — mirroring how the Active Coffee section is updated in `/new-coffee`. **Symlink-resolve before writing:** `user-setup.md` may be a symlink file into the private data repo; resolve it for consistent behavior across hosts. Run `readlink user-setup.md`; if it resolves, Read AND Edit the resolved absolute target (e.g. `/path/to/private-repo/user-setup.md`); if `readlink` returns nothing (regular file — no private repo configured), operate on the literal path. The Read-before-edit and the Edit must target the SAME resolved path. This write must reach the Step 4e `.data-repo-path` commit/push **even when no rating is recorded** (a mid-bag RPM report may arrive on an unrated shot), so perform the Step 4e commit path regardless of whether a rating was logged.
 
 When the stated RPM matches the current `Operating RPM` (or no RPM is stated), do nothing here — no warning, no update.
 
@@ -150,7 +152,7 @@ Append a row to the Tasting Notes table in the active coffee's `README.md`:
 The Rating column records whether the shot worked — low-rated rows are diagnostic data, not noise.
 
 **Update process (append-only — preserves header, alignment line, and every existing data row):**
-0. **Symlink-resolve before reading-for-edit or writing.** `grind-map.md` is a symlink file into the private data repo and the Edit/Write tool refuses to write through it. Run `readlink grind-map.md`; if it resolves, Read AND Edit the resolved absolute target (e.g. `/Users/charlie.hall/Workspaces/gaggimate-barista-data/grind-map.md`); if `readlink` returns nothing (regular file — no private repo configured), operate on the literal path. The Read-before-edit and the Edit must target the SAME resolved path. Use this resolved path for steps 1–7 below.
+0. **Symlink-resolve before reading-for-edit or writing.** `grind-map.md` may be a symlink file into the private data repo; resolve it for consistent behavior across hosts. Run `readlink grind-map.md`; if it resolves, Read AND Edit the resolved absolute target (e.g. `/path/to/private-repo/grind-map.md`); if `readlink` returns nothing (regular file — no private repo configured), operate on the literal path. The Read-before-edit and the Edit must target the SAME resolved path. Use this resolved path for steps 1–7 below.
 1. Read current `grind-map.md` (at the resolved path from step 0). Do NOT touch the header line, the alignment line, or any existing data rows.
 2. **Misaligned-row guard (run before appending, every invocation):** Scan the live `grind-map.md` for any data row whose column count ≠ 13. If one is found, flag it to the user (e.g., "Heads up — row N in `grind-map.md` has a column count that doesn't match the 13-column header; you may want to fix it by hand."). Do NOT auto-backfill or rewrite the row — flag only. (At plan time the live file has the 13-column header and zero data rows, but a user may have hand-edited or restored old rows, so this check is a runtime responsibility on every invocation.)
 3. Append a new row to the **end** of the file with these 13 fields in order: `Coffee, Roast, Process, Origin, Days Off Roast, Grind, RPM, Profile, Ratio, Temp, Rating, Date, Puck Screen?`

@@ -8,7 +8,9 @@ description: >
   from its content rather than from memory or training data.
 ---
 
-<command-name>consult</command-name>
+## Host and paths
+
+Read `../../../AGENTS.md` first. Resolve `knowledge/` and `user-setup.md` from that repository root, not this skill directory. In Pi use `/skill:consult`; in other hosts load this file directly.
 
 # Espresso Knowledge Consult Skill
 
@@ -37,7 +39,7 @@ Use the routing table below to identify which file(s) to load. Match on keywords
 | automatic pro, firmware, built-in profile | `knowledge/automatic-pro/AUTOMATIC_PRO_GUIDE.md` | — |
 | adjust, dial in, what to change, improvement | `knowledge/ESPRESSO_BREWING_BASICS.md` | — |
 
-If the question spans two topics (e.g., "what pressure for a natural at light roast?"), load both the primary and secondary files.
+If the question spans two topics, choose the primary file for the main question. The secondary column is a routing hint, not permission to exceed the one-quick-reference limit.
 
 If no keywords match, default to `knowledge/ESPRESSO_BREWING_BASICS.md` — it covers the broadest range of topics.
 
@@ -45,7 +47,7 @@ If no keywords match, default to `knowledge/ESPRESSO_BREWING_BASICS.md` — it c
 
 When the question matches the grind/grinder routing row, resolve the active grinder reference before loading:
 
-Per the CLAUDE.md Active Grinder field parsing contract, read the `user-setup.md` Grinder field, resolve the active grinder reference by case-insensitive substring against the contract's map (first match wins), attempt to load that `knowledge/grinders/` file, and on any miss or unreadable `user-setup.md` degrade to grinder-relative step advice plus the unconfigured nudge — never error.
+Per the AGENTS.md Active Grinder field parsing contract, read the `user-setup.md` Grinder field, resolve the active grinder reference by case-insensitive substring against the contract's map (first match wins), attempt to load that `knowledge/grinders/` file, and on any miss or unreadable `user-setup.md` degrade to grinder-relative step advice plus the unconfigured nudge — never error.
 
 This Grinder-field read is a config read that lies outside the cascade cap (the cap covers only knowledge/reference loads — see §5 below).
 
@@ -53,11 +55,9 @@ This Grinder-field read is a config read that lies outside the cascade cap (the 
 
 Read the identified primary knowledge file.
 
-### 3. LOAD Secondary File (if needed)
+### 3. CHECK Scope
 
-If the question spans two topics, read the secondary file too.
-
-**Stop rule:** Do not load more than 2 quick-reference files per question.
+**Stop rule:** Load at most ONE quick-reference file and ONE deep reference per question. If a second quick-reference topic needs separate treatment, offer to address it as a follow-up. A secondary deep reference is loaded only under Step 5.
 
 ### 4. ANSWER from File Content
 

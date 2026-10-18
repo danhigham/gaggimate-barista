@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "gaggimate": {
+      "command": "bash",
+      "args": ["bin/gaggimate-mcp.sh"],
+      "cwd": ".",
+      "exposure": "direct",
+      "description": "Gaggimate espresso profiles, shot telemetry, tasting notes and connection diagnostics"
+    }
+  }
+}

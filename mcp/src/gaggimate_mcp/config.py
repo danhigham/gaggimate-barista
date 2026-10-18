@@ -1,6 +1,7 @@
 """Configuration management for Gaggimate MCP server."""
 
 from pathlib import Path
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -14,11 +15,20 @@ class GaggimateConfig(BaseSettings):
         extra="ignore",
         case_sensitive=False,
         env_nested_delimiter="__",
+        populate_by_name=True,
     )
 
     # Connection settings
-    gaggimate_host: str = "gaggimate.local"
-    gaggimate_protocol: str = "ws"
+    # Explicit aliases avoid doubling env_prefix for these historical field names.
+    # Retain the old double-prefixed variables for existing installations.
+    gaggimate_host: str = Field(
+        default="gaggimate.local",
+        validation_alias=AliasChoices("GAGGIMATE_HOST", "GAGGIMATE_GAGGIMATE_HOST"),
+    )
+    gaggimate_protocol: str = Field(
+        default="ws",
+        validation_alias=AliasChoices("GAGGIMATE_PROTOCOL", "GAGGIMATE_GAGGIMATE_PROTOCOL"),
+    )
     # Per-attempt HTTP request timeout (seconds). Sized for the full .slog
     # shot-log download over a weak link, not just a quick API call.
     request_timeout: float = 12.0

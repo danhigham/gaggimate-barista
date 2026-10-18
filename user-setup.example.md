@@ -1,5 +1,7 @@
 # User Setup
 
+Example only — replace the equipment and preferences below with your own before dialing in.
+
 ## Equipment
 
 | Component | Details |
@@ -24,7 +26,7 @@
 
 ## Active Coffee
 
-No active coffee. Use /new-coffee to set one, or tell me what you're brewing.
+No active coffee. Use /skill:new-coffee in Pi, or tell me what you're brewing.
 
 ## Bluetooth Scale & Auto-Stop
 

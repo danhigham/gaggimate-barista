@@ -91,7 +91,9 @@ echo "Configuring mcp/.env..."
 
 if [ -f "$MCP_ENV" ]; then
   # Strip any existing GAGGIMATE_STORAGE_PATH line, then append updated value.
-  grep -v "^GAGGIMATE_STORAGE_PATH=" "$MCP_ENV" > "$MCP_ENV.tmp"
+  # awk succeeds even when the old storage setting was the file's only line.
+  # grep -v exits 1 in that case, aborting an otherwise idempotent setup.
+  awk '!/^GAGGIMATE_STORAGE_PATH=/' "$MCP_ENV" > "$MCP_ENV.tmp"
   mv "$MCP_ENV.tmp" "$MCP_ENV"
 fi
 

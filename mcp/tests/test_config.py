@@ -19,6 +19,38 @@ class TestGaggimateConfig:
         assert config.max_pressure == 12.0
         assert config.min_pressure == 0.0
 
+    def test_documented_environment_names(self, monkeypatch):
+        monkeypatch.setenv("GAGGIMATE_HOST", "espresso.example")
+        monkeypatch.setenv("GAGGIMATE_PROTOCOL", "wss")
+        config = GaggimateConfig(_env_file=None)
+        assert config.websocket_url == "wss://espresso.example/ws"
+        assert config.http_base_url == "https://espresso.example"
+
+    def test_legacy_environment_names(self, monkeypatch):
+        monkeypatch.delenv("GAGGIMATE_HOST", raising=False)
+        monkeypatch.delenv("GAGGIMATE_PROTOCOL", raising=False)
+        monkeypatch.setenv("GAGGIMATE_GAGGIMATE_HOST", "legacy.example")
+        monkeypatch.setenv("GAGGIMATE_GAGGIMATE_PROTOCOL", "wss")
+        config = GaggimateConfig(_env_file=None)
+        assert config.websocket_url == "wss://legacy.example/ws"
+
+    def test_documented_names_take_precedence(self, monkeypatch):
+        monkeypatch.setenv("GAGGIMATE_HOST", "new.example")
+        monkeypatch.setenv("GAGGIMATE_GAGGIMATE_HOST", "old.example")
+        monkeypatch.setenv("GAGGIMATE_PROTOCOL", "wss")
+        monkeypatch.setenv("GAGGIMATE_GAGGIMATE_PROTOCOL", "ws")
+        config = GaggimateConfig(_env_file=None)
+        assert config.websocket_url == "wss://new.example/ws"
+
+    def test_dotenv_documented_names(self, tmp_path, monkeypatch):
+        for name in ("GAGGIMATE_HOST", "GAGGIMATE_PROTOCOL",
+                     "GAGGIMATE_GAGGIMATE_HOST", "GAGGIMATE_GAGGIMATE_PROTOCOL"):
+            monkeypatch.delenv(name, raising=False)
+        env_file = tmp_path / ".env"
+        env_file.write_text("GAGGIMATE_HOST=dotenv.example\nGAGGIMATE_PROTOCOL=wss\n")
+        config = GaggimateConfig(_env_file=env_file)
+        assert config.websocket_url == "wss://dotenv.example/ws"
+
     def test_config_override(self):
         """Test configuration values can be overridden."""
         config = GaggimateConfig(

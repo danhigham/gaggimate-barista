@@ -1,5 +1,8 @@
 # Local MCP configuration (contains machine-specific paths)
 .mcp.json
+.pi/mcp.json
+.pi/settings.json
+.pi/sessions/
 
 # Claude local settings
 .claude/settings.local.json
@@ -20,6 +23,7 @@ htmlcov/
 
 # MCP runtime data
 mcp/data/
+mcp/profiles/
 
 # Personal data (lives in private repo, symlinked back)
 coffees

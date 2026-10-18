@@ -3,6 +3,10 @@ name: gaggimate-profiles
 description: Create custom espresso extraction profiles for Gaggimate-equipped machines (Gaggia Classic Pro, Gaggia Classic Evo, Rancilio Silvia). Use when designing pressure profiles, flow profiles, blooming profiles, lever simulation profiles, or helping with espresso extraction settings and troubleshooting. Also use when the user mentions Gaggimate, espresso profiles, pressure profiling, or extraction parameters.
 ---
 
+## Host and paths
+
+Read `../../../AGENTS.md` first. Resolve repository paths (`knowledge/`, `coffees/`, `user-setup.md`, `.data-repo-path`) from that repository root, not this skill directory. Resolve `references/` from this skill directory. In Pi use `/skill:gaggimate-profiles`; in other hosts load this file directly. Follow AGENTS.md capability fallbacks when MCP is unavailable; save a draft without claiming upload.
+
 # Gaggimate Profile Creation Skill
 
 Create custom espresso extraction profiles for Gaggimate-equipped machines. Gaggimate supports **Simple** and **Pro** profile types, with Pro profiles offering pressure profiling, flow control, and complex transitions.
@@ -47,7 +51,7 @@ Always output complete, valid JSON with ALL required fields:
 
 ```json
 {
-  "label": "Profile Name",
+  "label": "Profile Name [AI]",
   "type": "pro",
   "description": "Optional description",
   "temperature": 93,

@@ -7,7 +7,9 @@ description: >
   Fetches shot data via analyze_shot MCP tool, interprets patterns, and provides actionable recommendations.
 ---
 
-<command-name>diagnose</command-name>
+## Host and paths
+
+Read `../../../AGENTS.md` first. Resolve repository paths (`knowledge/`, `coffees/`, `user-setup.md`, `grind-map.md`, `.data-repo-path`) from that repository root, not this skill directory. Resolve `references/` from this skill directory. In Pi use `/skill:diagnose`; in other hosts load this file directly. Follow AGENTS.md capability fallbacks when MCP or subagents are unavailable.
 
 # Espresso Diagnostic Skill
 
@@ -146,7 +148,7 @@ Cross-reference the user's taste feedback with telemetry patterns.
 
 **Puck Screen presence detection (pre-check before applying sour-path or channeling-path recommendations):**
 
-Scan the Equipment table in `user-setup.md` for a `Puck Screen` row. Per the CLAUDE.md parsing contract, treat any of the following as **no screen present** (skip the guardrails below): missing row, blank value, or value `None` (case-insensitive). Any other non-empty value means **screen present** — apply the gated guardrails below.
+Scan the Equipment table in `user-setup.md` for a `Puck Screen` row. Per the AGENTS.md parsing contract, treat any of the following as **no screen present** (skip the guardrails below): missing row, blank value, or value `None` (case-insensitive). Any other non-empty value means **screen present** — apply the gated guardrails below.
 
 The skill does NOT carry its own copy of the guardrail wording — it routes to `knowledge/PUCK_SCREENS.md` §Diagnostic Guardrails as the Single Source of Truth. The cold-screen check is a pre-check inserted before the existing sour → grind-finer path, NOT a replacement for the diagnostic hierarchy.
 
@@ -176,7 +178,7 @@ Always explain WHY each recommendation addresses the diagnosed issue.
 
 **Telemetry correlation, equipment differentiation, multi-shot comparison:** See [references/TELEMETRY_PATTERNS.md](references/TELEMETRY_PATTERNS.md).
 
-### 4b. SELF-CHECK via Multi-Agent Review
+### 4b. SELF-CHECK via Critic Review
 
 After forming all recommendations (Step 4) but before presenting to the user, run a
 two-stage reasoning check. Full protocol (claims format, prompt templates, confidence
@@ -189,19 +191,22 @@ From your full draft (telemetry summary + diagnosis + recommendations), extract 
 PRESSURE_NARRATIVE, TASTE_SIGNAL, PRIMARY_DIAGNOSIS, PRIMARY_RECOMMENDATION.
 Include every grind direction signal in the draft, even conflicting ones.
 
-**Step 2 — Spawn Sonnet critic:**
-Spawn a critic via the Task tool (`subagent_type: general-purpose`) using the
-Critic Prompt Template from `references/SELF_CHECK.md`, with your draft and claims
-block substituted in.
+**Step 2 — Critic pass:**
+Apply the Critic Prompt Template from `references/SELF_CHECK.md` to the draft and
+claims block. If the host provides a subagent tool, an independent critic may use
+it with the user's configured model. Otherwise perform this pass in-session;
+no particular tool or model is required. Reviewers must not write files or call
+device-mutating tools.
 
 **Step 3 — Evaluate result:**
 - `STATUS: CLEAR` → present draft to user as-is (omit claims block from output)
 - `STATUS: OBJECTIONS` → proceed to Step 4
 
-**Step 4 — Spawn Opus arbiter (only when objections found):**
-Spawn via Task tool (`subagent_type: general-purpose`, `model: opus`) using the
-Arbiter Prompt Template from `references/SELF_CHECK.md`. Present the arbiter's
-corrected output to the user. Add a confidence note only if confidence is Low or Medium.
+**Step 4 — Arbiter pass (only when objections found):**
+Apply the Arbiter Prompt Template from `references/SELF_CHECK.md`, independently
+if supported or in-session otherwise. Resolve objections before presenting the
+corrected output. Do not describe sequential self-review as independent review.
+Add a confidence note only if confidence is Low or Medium.
 
 ---
 

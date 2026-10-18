@@ -1,6 +1,9 @@
 # Self-Check Protocol: /diagnose
 
-Two-stage multi-agent review to catch reasoning errors before presenting to the user.
+Two-stage critic/arbiter review to catch reasoning errors before presenting to the user.
+Use independent subagents only if the host provides them; otherwise apply both passes
+sequentially in-session. Use the configured model, not a hardcoded provider. Do not
+claim independent review when using the fallback. Reviewers are read-only.
 
 ---
 
@@ -29,13 +32,9 @@ The critic only checks what you surface here.
 
 ## Critic Prompt Template
 
-Task tool call parameters:
-- `description`: "Sonnet critic for diagnose self-check" (short label only)
-- `subagent_type`: `general-purpose`
-- `model`: `sonnet`
-- `prompt`: the full text below, with `{{DRAFT}}` and `{{CLAIMS}}` substituted
-
-**`description` is just a short label — the full critic prompt goes in `prompt`, not `description`.**
+Apply the full prompt below with `{{DRAFT}}` and `{{CLAIMS}}` substituted.
+For an optional subagent, pass the full text in its prompt field using the host's
+actual tool schema. Without subagents, use it as an in-session checklist.
 
 ```
 You are an espresso diagnosis critic. Your job is to find reasoning errors in a draft
@@ -105,11 +104,7 @@ CHECK 4: Style-Relative Thresholds
 
 ## Arbiter Prompt Template
 
-Task tool call parameters:
-- `description`: "Opus arbiter for diagnose self-check"
-- `subagent_type`: `general-purpose`
-- `model`: `opus`
-- `prompt`: the full text below, with `{{DRAFT}}`, `{{CLAIMS}}`, and `{{OBJECTIONS}}` substituted
+Apply this as a second review pass, using the same host capability rules as the critic.
 
 Use this prompt only when the critic returned OBJECTIONS. Substitute `{{DRAFT}}`,
 `{{CLAIMS}}`, and `{{OBJECTIONS}}`:

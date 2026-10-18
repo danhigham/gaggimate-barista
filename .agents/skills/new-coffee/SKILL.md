@@ -10,7 +10,9 @@ description: >
   for similar coffees, then recommends temperature, grind, ratio, and profile.
 ---
 
-<command-name>new-coffee</command-name>
+## Host and paths
+
+Read `../../../AGENTS.md` first. Resolve repository paths (`knowledge/`, `coffees/`, `user-setup.md`, `grind-map.md`, `.data-repo-path`) from that repository root, not this skill directory. Resolve `references/` from this skill directory. In Pi use `/skill:new-coffee`; in other hosts load this file directly. Follow AGENTS.md capability fallbacks when search, vision, MCP, or subagents are unavailable.
 
 # New Coffee Research Skill
 
@@ -55,7 +57,7 @@ Read `grind-map.md` and find similar coffees:
 - Match by: roast level > processing method > origin
 - **Consider profile style compatibility**: A grind setting from a bloom profile at 7.5 bar won't translate directly to a turbo at 6 bar. When presenting matches, include the Profile, Ratio, and Temp columns so the user sees the full extraction context.
 - If match found: use as starting point, adjust for freshness and profile style differences
-- If no match: load the active grinder reference resolved per the Active Grinder field parsing contract (`knowledge/grinders/` file) with the Req 4 attempt-then-fallback — Per the CLAUDE.md Active Grinder field parsing contract, read the `user-setup.md` Grinder field, resolve the active grinder reference by case-insensitive substring against the contract's map (first match wins), attempt to load that `knowledge/grinders/` file, and on any miss or unreadable `user-setup.md` degrade to grinder-relative step advice plus the unconfigured nudge — never error.
+- If no match: load the active grinder reference resolved per the Active Grinder field parsing contract (`knowledge/grinders/` file) with the Req 4 attempt-then-fallback — Per the AGENTS.md Active Grinder field parsing contract, read the `user-setup.md` Grinder field, resolve the active grinder reference by case-insensitive substring against the contract's map (first match wins), attempt to load that `knowledge/grinders/` file, and on any miss or unreadable `user-setup.md` degrade to grinder-relative step advice plus the unconfigured nudge — never error.
 
 **Freshness adjustment:** Fresher beans (fewer days off roast) need **coarser** grind — CO2 adds puck resistance. If historical match was at 14 days and new bag is 7 days, suggest a small step / 1-2 steps coarser.
 
@@ -71,7 +73,7 @@ Build recommendations using:
 - **Volumetric target:** When using a library profile, confirm its volumetric stop matches dose × ratio. Library profiles are sized for 22g.
 - **RPM (variable-speed grinders only — gated):** After resolving the active grinder per the Active Grinder field parsing contract (already done in Step 3 CONSULT), check whether the resolved **quick-tier** `knowledge/grinders/<NAME>.md` contains a section heading exactly `## Motor Speed (RPM)`. **If it does → RPM behavior ON:** include an RPM starting recommendation in the output table (see the conditional RPM row below). The rendered value is the user's `Operating RPM` from `user-setup.md` (per its integer parse rule) if set, else the reference default from that grinder file's `## Motor Speed (RPM)` section — do not restate the literal numbers here; read them at runtime. **If the heading is absent / no quick-tier file resolved / the Active Grinder contract fell back to fallback / `user-setup.md` is unreadable → RPM behavior OFF:** this is a **fixed-speed** path — omit the RPM row entirely and **never error**.
 
-### 4b. SELF-CHECK via Multi-Agent Review
+### 4b. SELF-CHECK via Critic Review
 
 Before confirming with the user, run a two-stage reasoning check.
 Full protocol (claims format, prompt templates, confidence calibration) in
@@ -82,19 +84,21 @@ From your synthesis, extract a `<claims>` block listing: GRIND_ESTIMATE (setting
 source), GRIND_MATCH_SIMILARITY, GRIND_CONFIDENCE, TEMP, PRESSURE, PROFILE, RATIO,
 one CONDITIONAL_RECOMMENDATION line per "if X → Y" in the draft, ADJUSTMENT_COUNT.
 
-**Step 2 — Spawn Sonnet critic:**
-Spawn a critic via the Task tool (`subagent_type: general-purpose`) using the
-Critic Prompt Template from `references/SELF_CHECK.md`, with your draft and claims
-block substituted in.
+**Step 2 — Critic pass:**
+Apply the Critic Prompt Template from `references/SELF_CHECK.md` to the draft and
+claims block. If the host provides a subagent tool, an independent critic may use
+it with the user's configured model. Otherwise perform this pass in-session;
+no particular tool or model is required. Reviewers must not write files or call
+device-mutating tools.
 
 **Step 3 — Evaluate result:**
 - `STATUS: CLEAR` → proceed to "CONFIRM with User" using your draft
 - `STATUS: OBJECTIONS` → proceed to Step 4
 
-**Step 4 — Spawn Opus arbiter (only when objections found):**
-Spawn via Task tool (`subagent_type: general-purpose`, `model: opus`) using the
-Arbiter Prompt Template from `references/SELF_CHECK.md`. Use the arbiter's corrected
-output when confirming with the user.
+**Step 4 — Arbiter pass (only when objections found):**
+Apply the Arbiter Prompt Template from `references/SELF_CHECK.md`, independently
+if supported or in-session otherwise. Resolve objections before confirming with
+the user. Do not describe sequential self-review as independent review.
 
 The grind confidence note from `references/SELF_CHECK.md` is always included in the
 Starting Parameters table — even when the critic returns CLEAR.
@@ -111,7 +115,7 @@ Options to offer (each option creates a dedicated per-coffee profile — see Ste
 - **Recommended:** Profile matched to bean characteristics (roast, process, intensity)
 - **Adventurous:** Bloom profile or turbo shot if appropriate
 
-User confirmation of any of these three options authorizes Step 6 to create + activate a new per-coffee `[AI]` profile. Do NOT ask a second time "shall I upload?" — it's part of the same authorization.
+State explicitly that the selected option will be saved, uploaded, and activated on the machine, then ask for approval. Only confirmation of that combined action authorizes Step 6 to create + activate a new per-coffee `[AI]` profile. A style preference alone is not upload permission. No second confirmation is needed after clear combined approval.
 
 **Reuse exception:** If the user explicitly says "reuse [profile name]", "use the [profile] already on the device", or names an existing `[AI]` profile to apply as-is, skip Step 6's create + select. Note the reused profile in the README's Profiles table with `*(reused from coffees/{other-slug}/)*` and link the JSON via relative path.
 
@@ -119,7 +123,7 @@ User confirmation of any of these three options authorizes Step 6 to create + ac
 
 **Default behavior (runs whenever Step 5 confirmed Conservative/Recommended/Adventurous).** Skip only when the Reuse exception in Step 5 applies.
 
-Per CLAUDE.md "Repo first, device second": the JSON file is the source of truth. Always write to repo before calling MCP.
+Per AGENTS.md "Repo first, device second": the JSON file is the source of truth. Always write to repo before calling MCP.
 
 1. **Write JSON to repo first.** Path: `coffees/{coffee-slug}/{profile-slug}.json`. Profile slug is kebab-case from the style (e.g., `bloom-slide.json`, `turbo.json`, `dark-gentle.json`). The JSON's `label` field must equal `[Coffee Name] [Style] [AI]` (e.g., `Aponte Honey Bloom Slide [AI]`).
 
@@ -190,7 +194,7 @@ table. 2-4 bullets is typical.}
 
 ### 8. Set Active Coffee
 
-`user-setup.md` is a symlink FILE into the private data repo, and the Edit/Write tool refuses to write through a symlink. Before reading-for-edit OR writing it, resolve the symlink and operate on the REAL target: run `readlink user-setup.md`; if it resolves, Read AND Edit the resolved absolute target (e.g. `/Users/charlie.hall/Workspaces/gaggimate-barista-data/user-setup.md`); if `readlink` returns nothing (regular file — no private repo configured), operate on the literal path. The Read-before-edit and the Edit must target the SAME resolved path.
+`user-setup.md` may be a symlink FILE into the private data repo; resolve it for consistent behavior across hosts. Before reading-for-edit OR writing it, resolve the symlink and operate on the REAL target: run `readlink user-setup.md`; if it resolves, Read AND Edit the resolved absolute target (e.g. `/path/to/private-repo/user-setup.md`); if `readlink` returns nothing (regular file — no private repo configured), operate on the literal path. The Read-before-edit and the Edit must target the SAME resolved path.
 
 Update the Active Coffee section in `user-setup.md` with:
 - **Coffee**: Full coffee name (e.g., "PERC Ethiopia Chelchele")

@@ -1,5 +1,16 @@
 # Gaggimate MCP — Maintainer Notes
 
+For Pi and other agent setup, see the root [README](../README.md) and
+[agent compatibility guide](../docs/AGENT_COMPATIBILITY.md). This server is
+provider-neutral stdio MCP. Use `bin/gaggimate-mcp.sh` as its entry point: it
+sets the working directory to `mcp/` for `.env` and relative storage paths.
+`GAGGIMATE_HOST` and `GAGGIMATE_PROTOCOL` configure device connectivity; legacy
+double-prefixed names are also supported. No model credentials belong here.
+
+Run tests from the repository root with
+`uv run --project mcp --extra dev pytest mcp/tests` (add a test-file path to
+narrow the run). This does not require a connected machine.
+
 Operational documentation for maintainers working on the Gaggimate MCP server. The Python module `mcp/src/gaggimate_mcp/analysis/shot_analyzer.py` (a Python port of the device-side `AnalyzerService.js`) needs periodic re-syncing whenever upstream gaggimate firmware bumps the analyzer logic; this README captures that workflow plus the fixture-capture procedure used by the parity test.
 
 For per-fixture context (which `.slog` exercises which extraction archetype, byte-stability conventions for `.golden.json`, etc.), see `mcp/tests/fixtures/shots/README.md` — this file deliberately does not duplicate that content.
@@ -49,5 +60,5 @@ The committed fixtures (246, 247, 249) span two profile types and three structur
 - **Flow-target-only Turbo profiles** — none of the three committed fixtures exercise a phase that uses a flow target as its sole stop condition. Turbo-style profiles (coarse grind, short dwell, flow-stop) would exercise the flow-classification branch of `classify_phase_exits` in isolation and shake out any pressure/duration cross-talk in the algorithm.
 - **Pure power-target profiles** — fixture 249 is suspected to contain a power-target phase, but no committed fixture covers a profile that is *exclusively* power-targeted across all phases. DDSA classifies power-target exits as `duration` (no quantitative stop target exists in the JS), and a pure-power fixture would confirm that fallback fires consistently across multi-phase profiles.
 - **Decaf and dark-roast bean profiles** — all three fixtures are light-medium roast naturals/bloom-slide extractions. Decaf porosity and dark-roast solubility produce visibly different pressure-flow signatures; coverage here would catch parity drift in the auto-delay estimator's edge handling for atypical curves.
-- **Cross-era fixtures (mixed pre-1.8.0 + post-1.8.0)** — every committed `.slog` was captured under firmware 1.8.0. A cross-era cohort would exercise the `evt:status.bt` semantic-flip and `MIN_FREE_SPACE_BYTES` retention-shift edge cases (documented in the project root `CLAUDE.md` under "Firmware 1.8.0 semantic traps") and confirm the port is robust to mixed-vintage shot data.
+- **Cross-era fixtures (mixed pre-1.8.0 + post-1.8.0)** — every committed `.slog` was captured under firmware 1.8.0. A cross-era cohort would exercise the `evt:status.bt` semantic-flip and `MIN_FREE_SPACE_BYTES` retention-shift edge cases (documented in the project root `AGENTS.md` under "Firmware 1.8.0 semantic traps") and confirm the port is robust to mixed-vintage shot data.
 - **Scale-lost-mid-shot scenario** — the JS source propagates a sticky "scale lost permanently" flag across four check sites and two fallback paths (lines 407, 447, 545, 624, 691-692, 804). The port implements all six explicitly, but no committed fixture forces the propagation path to fire mid-extraction. A synthetic or curated capture where the BT scale drops out partway through the brew phase would close this gap.
